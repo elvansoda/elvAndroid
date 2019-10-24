@@ -36,7 +36,7 @@ public class Look extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_look);
 
-        listView = (ListView)findViewById(R.id.Items);
+        listView = findViewById(R.id.Items);
 
         listView.setAdapter(adapter);
 
@@ -56,10 +56,11 @@ public class Look extends AppCompatActivity {
                 new JSONTask().execute("https://elvansoda.herokuapp.com/api/stocks"); //버튼을 눌렀을때 접속
             }
         });
+
+        new JSONTask().execute("https://elvansoda.herokuapp.com/api/stocks");
     }
 
     public class JSONTask extends AsyncTask<String, String, String> {
-
         @Override
         protected String doInBackground(String... urls) {
             try {
@@ -119,7 +120,6 @@ public class Look extends AppCompatActivity {
 
         public void onPostExecute(String result) {
             super.onPostExecute(result);
-            System.out.println(result);
             try {
                 JSONArray ja = new JSONArray(result);
                 ListViewAdapter adapter = new ListViewAdapter();
@@ -133,6 +133,7 @@ public class Look extends AppCompatActivity {
             } catch (NullPointerException ne) {
                 System.out.println(result);
             }
+            Toast.makeText(Look.this, "갱신이 성공적으로 이루어졌습니다.", Toast.LENGTH_SHORT).show();
         }
     }
 
