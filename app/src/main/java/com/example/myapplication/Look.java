@@ -83,7 +83,7 @@ public class Look extends AppCompatActivity {
                     StringBuffer buffer = new StringBuffer();
 
                     //line별 스트링을 받기 위한 temp 변수
-                    String line = "";
+                    String line;
 
                     //아래라인은 실제 reader에서 데이터를 가져오는 부분이다. 즉 node.js서버로부터 데이터를 가져온다.
                     while ((line = reader.readLine()) != null) {
@@ -129,7 +129,7 @@ public class Look extends AppCompatActivity {
                 }
                 listView.setAdapter(adapter);
             } catch (JSONException e){
-
+                e.printStackTrace();
             } catch (NullPointerException ne) {
                 System.out.println(result);
             }
