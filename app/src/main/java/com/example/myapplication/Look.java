@@ -53,7 +53,7 @@ public class Look extends AppCompatActivity {
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new JSONTask().execute("http://elvansoda.herokuapp.com/manager/view"); //버튼을 눌렀을때 접속
+                new JSONTask().execute("https://elvansoda.herokuapp.com/api/stocks"); //버튼을 눌렀을때 접속
             }
         });
     }
@@ -119,16 +119,19 @@ public class Look extends AppCompatActivity {
 
         public void onPostExecute(String result) {
             super.onPostExecute(result);
+            System.out.println(result);
             try {
                 JSONArray ja = new JSONArray(result);
                 ListViewAdapter adapter = new ListViewAdapter();
                 for (int i = 0; i < ja.length(); i++) {
                     JSONObject order = ja.getJSONObject(i);
-                    adapter.addItem(order.getString("ProductName"), order.getInt("Price"), order.getInt("StockNum"));
+                    adapter.addItem(order.getString("product_name"), order.getInt("price"), order.getInt("stock_number"));
                 }
                 listView.setAdapter(adapter);
-            } catch (JSONException e) {
+            } catch (JSONException e){
 
+            } catch (NullPointerException ne) {
+                System.out.println(result);
             }
         }
     }

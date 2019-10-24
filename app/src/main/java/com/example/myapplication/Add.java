@@ -24,9 +24,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.Buffer;
 
 
 public class Add extends AppCompatActivity {
@@ -52,12 +54,12 @@ public class Add extends AppCompatActivity {
         buttondelete = (Button) findViewById(R.id.buttondelete);
         buttoninsert.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                new JSONTask().execute("http://elvansoda.herokuapp.com/manager/insert"); //버튼을 눌렀을때 접속
+                new JSONTask().execute("http://elvansoda.herokuapp.com/api/stocks"); //버튼을 눌렀을때 접속
             }
         });
         buttondelete.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                new JSONTask().execute("http://elvansoda.herokuapp.com/manager/delete"); //버튼을 눌렀을때 접속
+                new DeleteTask().execute("http://elvansoda.herokuapp.com/api/stocks/" + nameinsert.getText()); //버튼을 눌렀을때 접속
             }
         });
         mainbutton.setOnClickListener(new View.OnClickListener() {
@@ -68,11 +70,55 @@ public class Add extends AppCompatActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent); //액티비티 이동
             }
-
         });
 
     }
 
+    public class DeleteTask extends AsyncTask<String, String, String> {
+        private String url = "";
+        @Override
+        protected String doInBackground(String... urls) {
+            try {
+                HttpURLConnection httpCon = null;
+                BufferedReader reader = null;
+
+                try {
+                    URL url = new URL(urls[0]);
+                    this.url = urls[0];
+                    httpCon = (HttpURLConnection) url.openConnection();
+                    httpCon.setRequestMethod("DELETE");
+                    httpCon.setRequestProperty("Content-Type", "application/x-www-from-urlencoded");
+
+                    reader = new BufferedReader(new InputStreamReader(httpCon.getInputStream()));
+                    StringBuffer buf = new StringBuffer();
+
+                    String line;
+                    while((line = reader.readLine()) != null) {
+                        buf.append(line);
+                    }
+
+                    return buf.toString();
+                } catch (MalformedURLException me) {
+                    me.printStackTrace();
+                } catch (IOException ie) {
+                    ie.printStackTrace();
+                } finally {
+                    if(httpCon != null) {
+                        httpCon.disconnect();
+                    }
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        public void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+        }
+    }
     public class JSONTask extends AsyncTask<String, String, String> {
         private String url = "";
 
@@ -80,19 +126,18 @@ public class Add extends AppCompatActivity {
         protected String doInBackground(String... urls) {
             try {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.accumulate("ProductName", nameinsert.getText()); //json으로 보내는 텍스트 초기화
-                jsonObject.accumulate("StockNum", stocknuminsert.getText());
-                jsonObject.accumulate("Price", priceinsert.getText());
-                jsonObject.accumulate("isAdult", isAdultCheckBox.isChecked());
+                jsonObject.accumulate("product_name", nameinsert.getText());
+                jsonObject.accumulate("stock_number", stocknuminsert.getText());
+                jsonObject.accumulate("price", priceinsert.getText());
+                jsonObject.accumulate("is_adult", isAdultCheckBox.isChecked());
                 HttpURLConnection con = null;
                 BufferedReader reader = null;
 
                 try {
-                    //URL url = new URL("http://192.168.11.39:3000/insert");
                     URL url = new URL(urls[0]);
                     this.url = urls[0];
                     con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("POST");
+                    con.setRequestMethod("PUT");
                     con.setRequestProperty("Cache-Control", "no-cache");
                     con.setRequestProperty("Content-Type", "application/json");
                     con.setRequestProperty("Accept", "text/html");
@@ -144,13 +189,13 @@ public class Add extends AppCompatActivity {
 
         public void onPostExecute(String result) {
             super.onPostExecute(result);
-            if(result.contains("No Data")) Toast.makeText(Add.this, "데이터가 없습니다.", Toast.LENGTH_SHORT).show();
-            else if(this.url.contains("delete")) Toast.makeText(Add.this, "삭제가 성공적으로 진행됐습니다.", Toast.LENGTH_SHORT).show();
-            else if(this.url.contains("insert")) Toast.makeText(Add.this, "추가가 성공적으로 진행됐습니다.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(Add.this, Toast.LENGTH_SHORT).show();
 
-
+            System.out.println(result);
         }
     }
+
+
 }
 
 
